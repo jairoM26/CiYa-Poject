@@ -71,9 +71,6 @@ class PupilDetector
     int i, j, k;
     int w, h, wh;
     
-    color col;
-    float lum;
-    
     w = img.width;
     h = img.height;
     wh = w * h;
