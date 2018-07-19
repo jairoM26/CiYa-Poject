@@ -1,3 +1,4 @@
+# coding=utf-8
 '''
  * pupil-tracker.py
  * @brief Programa para detectar la posicion de la pupila en el ojo
@@ -32,7 +33,9 @@
  * @author Mariana Guerrero Jimenez <>
  * @author Jairo Mendez Martinez <jairomendezmartinez@gmail.com>
  * @date 16-07-2018
+
 '''
+
 import cv2
 import numpy as np
 
@@ -43,25 +46,70 @@ import numpy as np
  * ejemplo de ejecucion: pupilDetect('myImage.jpg')
  * @return void
 '''
-def pupilDetect(imageName):
-    img = cv2.imread(imageName,0)
-    img = cv2.medianBlur(img,21)
-    cimg = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
+def pupilDetect(pImageName):
+    imageToTrack = cv2.imread(pImageName,0) #open image to track
 
-    circles = cv2.HoughCircles(img,cv2.HOUGH_GRADIENT,1,40,
-                                param1=50,param2=30,minRadius=0,maxRadius=0)
+    backUpImage = imageToTrack.copy() #made a backup of the image
 
-    circles = np.uint16(np.around(circles))
-    for i in circles[0,:]:
-        # draw the outer circle
-        print("outer circle: x: ",i[0], " y: ", i[1], " r:", i[2])
-        cv2.circle(cimg,(i[0],i[1]),i[2],(0,255,0),2)
-        # draw the center of the circle
-        cv2.circle(cimg,(i[0],i[1]),2,(0,0,255),3)
+    imageToTrack = cv2.medianBlur(imageToTrack, 49) #apply the medianBlur function to the image to process
 
-    cv2.imshow('detected circles',cimg)
-    cv2.waitKey(0)
+    #This method usually increases the global contrast of many images, especially 
+    # when the usable data of the image is represented by close contrast values. 
+    # Through this adjustment,the intensities can be better distributed on the histogram.
+    #imageToTrack =cv2.equalizeHist(imageToTrack) # do the equalizeHist
+    
+    #aplicar filtro de blanco y negro a la imagen
+    ret, imageToTrack = cv2.threshold(imageToTrack,0,255,cv2.THRESH_BINARY)  
+    
+    threshold = cv2.inRange(imageToTrack,250,255)     #get the blobs
+    
+    contours = cv2.findContours(threshold,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)[1]    
+
+    if len(contours) >= 2:
+        #find biggest blob
+        maxArea = 0
+        MAindex = 0         #to get the unwanted frame 
+        distanceX = []      #delete the left most (for right eye)
+        currentIndex = 0 
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            center = cv2.moments(cnt)
+            if (center['m00'] !=0 ): # Evita la división por cero
+                cx,cy = int(center['m10']/center['m00']), int(center['m01']/center['m00'])
+                distanceX.append(cx)    
+            if area > maxArea:
+                maxArea = area
+                MAindex = currentIndex
+            currentIndex = currentIndex + 1
+
+        del contours[MAindex]       #remove the picture frame contour
+        del distanceX[MAindex]
+
+    if len(contours) >= 2:      #delete the left most blob for right eye
+        edgeOfEye = distanceX.index(max(distanceX)) 
+        del contours[edgeOfEye]
+        del distanceX[edgeOfEye]
+
+    if len(contours) >= 1:      #get largest blob
+        maxArea = 0
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            if area > maxArea:
+                maxArea = area
+                largeBlob = cnt
+            
+    if len(largeBlob) > 0:  
+        center = cv2.moments(largeBlob)
+        if (center['m00']) != 0: # Se agrega un if para evitar division por cero 
+            cx,cy = int(center['m10']/center['m00']), int(center['m01']/center['m00'])
+            print(cx,cy)
+            cv2.circle(backUpImage,(cx,cy),10,255,-1)
+        
+
+    #print("x: ", cx, " y: ", cy)
+    #show picture
+    cv2.imshow('Result',backUpImage)    
     cv2.destroyAllWindows()
 
 ########## PRUEBA ###############
-pupilDetect('prueba.jpeg')
+pupilDetect('prueba4.jpeg')
