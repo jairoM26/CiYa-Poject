@@ -31,14 +31,33 @@
 
 import cv2
 import numpy as np
+from Constants import *
 
 '''
  * @brief funcion para decodificar
  * 
  * @param pX: int corresponding to the x coord
  * @param pY: int corresponding to the y coord
- * @param pR: int corresponding to the ratio of the circles
  *
  * @return: the instruction code to execute
+ *          0 = center
+ *          1 = right
+ *          2 = left
+ *          3 = up
+ *          4 = down 
+ *
+ *
+
 '''
-def pupilDetect(pX, pY, pR):
+def decodeCoords(pX, pY):
+    if(pX <= initial_coord[0] and pX >= 10 and
+        pX >= initial_coord[0] and pX >= 10 and
+        pY <= initial_coord[1] and pY >= 10 and
+        pY >= initial_coord[1] and pY >= 10):
+        return (0,' center')
+    elif(pX < initial_coord[0]):
+        return (1,' right')
+    elif(pX > initial_coord[0]):
+        return (1,' left')
+    else:
+        return

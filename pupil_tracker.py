@@ -40,8 +40,11 @@ import numpy as np
  * @return void
 '''
 def pupilDetect(pImageName):
-    imageToTrack = cv2.imread(pImageName,0) #open image to track
+    cx, cy = (0,0)
+    imageToTrack = cv2.imread(pImageName,0) #open image to track   
 
+    imageToTrack = cv2.resize(imageToTrack, (680,400))
+   
     backUpImage = imageToTrack.copy() #made a backup of the image
 
     imageToTrack = cv2.medianBlur(imageToTrack, 49) #apply the medianBlur function to the image to process
@@ -97,13 +100,6 @@ def pupilDetect(pImageName):
             cx,cy = int(center['m10']/center['m00']), int(center['m01']/center['m00'])
             print(cx,cy)
             cv2.circle(backUpImage,(cx,cy),10,255,-1)
-        
-
-    #print("x: ", cx, " y: ", cy)
-    #show picture
-    cv2.imshow('Result',backUpImage)  
-    cv2.waitKey(0)  
-    cv2.destroyAllWindows()
     
-
-pupilDetect('arriba.jpeg')
+    return cx, cy
+        
