@@ -45,8 +45,43 @@ def pupilDetect(pImageName):
     backUpImage = imageToTrack.copy() #made a backup of the image
 
     imageToTrack = cv2.medianBlur(imageToTrack, 49) #apply the medianBlur function to the image to process
+
+    #This method usually increases the global contrast of many images, especially 
+    # when the usable data of the image is represented by close contrast values. 
+    # Through this adjustment,the intensities can be better distributed on the histogram.
+    imageToTrack =cv2.equalizeHist(imageToTrack) # do the equalizeHist
     
-    contours = cv2.findContours(imageToTrack,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)[1]    
+    #aplicar filtro de blanco y negro a la imagen
+    ret, imageToTrack = cv2.threshold(imageToTrack,0,255,cv2.THRESH_BINARY)  
+    
+    threshold = cv2.inRange(imageToTrack,250,255)     #get the blobs
+    
+    contours = cv2.findContours(threshold,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)[1]    
+
+    if len(contours) >= 2:
+        #find biggest blob
+        maxArea = 0
+        MAindex = 0         #to get the unwanted frame 
+        distanceX = []      #delete the left most (for right eye)
+        currentIndex = 0 
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            center = cv2.moments(cnt)
+            if (center['m00'] !=0 ): # Evita la división por cero
+                cx,cy = int(center['m10']/center['m00']), int(center['m01']/center['m00'])
+                distanceX.append(cx)    
+            if area > maxArea:
+                maxArea = area
+                MAindex = currentIndex
+            currentIndex = currentIndex + 1
+
+        del contours[MAindex]       #remove the picture frame contour
+        del distanceX[MAindex]
+
+    if len(contours) >= 2:      #delete the left most blob for right eye
+        edgeOfEye = distanceX.index(max(distanceX)) 
+        del contours[edgeOfEye]
+        del distanceX[edgeOfEye]
 
     if len(contours) >= 1:      #get largest blob
         maxArea = 0
@@ -66,9 +101,9 @@ def pupilDetect(pImageName):
 
     #print("x: ", cx, " y: ", cy)
     #show picture
-    cv2.imshow('Result',backUpImage) 
-    cv2.waitKey(0)   
+    cv2.imshow('Result',backUpImage)  
+    cv2.waitKey(0)  
     cv2.destroyAllWindows()
+    
 
-########## PRUEBA ###############
-pupilDetect('prueba4.jpeg')
+pupilDetect('arriba.jpeg')
