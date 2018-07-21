@@ -14,18 +14,18 @@
 
 import cv2
 import numpy as np
-from math import pi
-from Constants import DEBBUG, initial_coord, max_left_coord, max_right_coord
+from math import pi, atan2, sqrt, degrees
+from Constants import DEBBUG, WIDTH, HEIGHT
 
 class eye_tracker:
-
+    decodifyAlgorithm = None
     '''
     * @brief class constructor
     *
     * @param pType: indicate the decodification algorith type
     '''
     def __init__(self, pType):
-        self.type = pType
+        self.decodifyAlgorithm = pType
     '''
     * @brief function to detect the centroid of the pupil
     * 
@@ -43,7 +43,7 @@ class eye_tracker:
     *          5. Apply a binary filter to get only white and black color
     * @param imageName:parametro tipo string simple (''), el cual describe el nombre de la imagen a procesar
     * ejemplo de ejecucion: pupilDetect('myImage.jpg')
-    * @return 
+    * @return centroid of the pupil
     '''
     def pupilDetect(self, pImageName):
         cx = None 
@@ -51,8 +51,8 @@ class eye_tracker:
         
         imageToTrack = cv2.imread(pImageName,0) #open image to track   
         
-        imageToTrack = cv2.resize(imageToTrack, (680,400))
-        
+        imageToTrack = cv2.resize(imageToTrack, (WIDTH, HEIGHT))
+
         backUpImage = imageToTrack.copy()
 
         imageToTrack = cv2.medianBlur(imageToTrack, 51) #apply the medianBlur function to the image to process
@@ -83,14 +83,50 @@ class eye_tracker:
             perimeter = cv2.arcLength(cnt,True)
             radio = perimeter/(2*pi)
             #TODO find an accurate way to find the real pupil contour            
-            if(radio >= 13 and radio <= 30):
+            if(radio >= 13 and radio <= 29):
                 #find the centroid
                 if (center['m00'] !=0 ): # Evita la división por cero
                     cx,cy = int(center['m10']/center['m00']), int(center['m01']/center['m00'])
 
-        if(cx == None or cy == None): 
-            print('no pupil found')
-            return -1,-1
-        else:            
-            return cx, cy       
+        return cx, cy       
 
+    '''
+    * @brief method to decodify the pupil centroid
+    * 
+    * @details This method can perform 2 diferents algorithms to decodify the pupil centroid
+    *          The first one t
+    *          The second one (coords(pX, pY)) decodify the x and y pos of the pupil centroid and return
+    *          the angle and force corresponding to the coordinate axis, which the point 0, 0 its defined
+    *          on the center of the image
+    *
+    * @param pX: type integer: x position from the img
+    * @param pX: type integer: y position from the img
+    * 
+    * @return if decodifyAlgorithm equal to 0: the instruction of a gestor
+    *         if decodifyAlgorithm equal to 1: x, y, angle, force 
+    * 
+    '''
+    def decodify(self, pX, pY):
+        #TODO patron recognize algorithm to recognize gestors of the eye
+        def gestor():
+            return
+
+        def coords(pX, pY):
+            #convert coords to axis defined
+            pX -= WIDTH/2 
+            pY = HEIGHT/2 -pY
+            
+            #measure and converting angle depending on the coordinate in which the point is
+            angle = degrees(atan2(pY,pX))
+            if ((pX < 0 and pY < 0) or (pX > 0 and pY < 0)): angle += 360
+            elif (pX < 0 and pY > 0): angle += 180 
+
+            #calculating force           
+            force = sqrt(pX*pX + pY*pY)
+            return pX, pY, angle, force
+            
+        if (not self.decodifyAlgorithm):
+            return gestor()
+        elif (self.decodifyAlgorithm):
+            return coords(pX, pY)
+        
