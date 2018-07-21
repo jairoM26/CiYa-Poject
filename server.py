@@ -21,7 +21,7 @@ from Convert import *
 def startServer(port = 1):
     server_sock=BluetoothSocket( RFCOMM )
     server_sock.bind(("",PORT_ANY))
-    server_sock.listen()
+    server_sock.listen(1)
 
     #uuid de la maquina
     uuid = "bcb9605d-55f6-4081-b267-eaa91f610a9c"
@@ -49,3 +49,5 @@ def startServer(port = 1):
 
     client_sock.close()
     print "all done"
+
+startServer()
