@@ -15,11 +15,11 @@
  * @date 19-07-2018
 '''
 
-from bluetooth import *
+from bluetooth import discover_devices, find_service, BluetoothSocket, RFCOMM
 import sys
 import time
-import picamera
-from Convert import *
+#import picamera
+from Convert import convertImageToString
 
 global addr, service_matches
 addr = None
@@ -74,7 +74,7 @@ def sendData():
         while(True):           
             for i in range(0,4):
                 imageName = 'pict'+str(i)+'.jpeg'
-                takeAPicture(imageName)
+                #takeAPicture(imageName)
                 strPict = convertImageToString(imageName)
                 time.sleep(1)
                 sock.send(strPict)                
@@ -84,13 +84,13 @@ def sendData():
     
 
 '''
-'''
+
 def takeAPicture(pImageName):
     camera = picamera.Picamera()
     camera.resolution = (800,600)
     camera.start_preview()
     camera.capture(pImageName, resize =(200,200))
     camera.stop_preview()
-
+'''
 
 
