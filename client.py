@@ -47,7 +47,7 @@ def clientConnect(pUuid, pAddr=addr, port =1):
     while(True):
         service_matches = find_service( uuid = pUuid, address = pAddr )
 
-        if len(service_matches) != 1:
+        if len(service_matches) != 0:
             print('device found')
             break
     
@@ -64,6 +64,7 @@ def clientConnect(pUuid, pAddr=addr, port =1):
         return sock
     except:
         print('connection refuse')
+        return 
     
 '''
 '''
