@@ -30,4 +30,4 @@ def Resize(pImageToResize, pX, pY, pImageNameSave):
     #In case that we want to see the caracteristics of the image, use this:
     #im2 = Image.open("ImageSaved.jpg")
     #print(im2.format,im2.size,im2.mode) #Final size,format and mode of the image
-    return saved
+   
