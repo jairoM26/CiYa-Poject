@@ -4,17 +4,21 @@
 #Jairo Mendez Martinez
 #Mariana Guerrero Jimenez
 #Jean Carlos Gonzales Hernandez
-#Base on: Python for beginners "How to use a Pillow, a fork of PIL"
-#https://www.pythonforbeginners.com/gui/how-to-use-pillow
 
-#First, you need to install the Python Pillow library: pip install pillow
+
+#First, you need to install the Python Pillow library
 
 from PIL import Image
 
 '''
-Creating a thumbnail for an image. Those are reduced-size versions
-of pictures but still contains all of the most important aspects
-of an image
+@brief Resize: Function that creates a thumbnail of an image. Those are reduced-size versions of pictures but still contains all of the most important aspects of the image. 
+@param pImageToResize image to be load, string type. 
+@param pX, pY, size of the image in the X and Y axis. Integer type. 
+@pImageNameSave: Image saved after the thumbnail process. String type
+
+@details:
+	Based on:Python for beginners "How to use a Pillow, a fork of 		PIL" https://www.pythonforbeginners.com/gui/how-to-use-pillow
+		
 '''
 def Resize(pImageToResize, pX, pY, pImageNameSave):
     size = (pX, pY) #Size of the final resize image
