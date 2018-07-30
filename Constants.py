@@ -1,4 +1,4 @@
-DEBBUG = 0
+DEBBUG = 1
 WIDTH = 680
 HEIGHT = 400
 initial_coord = (298, 223)

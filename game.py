@@ -1,38 +1,67 @@
-from tkinter import *
-import os
-from threading import Thread
-import threading
-import random
-import time
+from Tkinter import * ##Interfaz
+import time ##Hora de la computadora
+from threading import Thread ##Thread (hilo), para evitar threading.Thread
+import random ##Metodos para generar numeros aleatorios
+import threading ##Hilos
+import os ##Caracterizticas del sistema operativo
 
-'''
-*  load_img
-*  Method that allows the load of an image (png or gif) file.
-*  @param name: the name of the file that is inside the imgs directory
-*  @returns img: the img load in the respective memory space
-'''
-def load_img(name):
-    path = os.path.join("images",name)
-    img = PhotoImage(file = path)
-    return img
+from pupil_tracker import eye_tracker
 
-def game():
-    gameWindow = Tk()
-    gameWindow.title("Game")
-    gameWindow.minsize(350,600)
-    gameWindow.resizable(width=False,height=False)
-    gameWindow.geometry("350x600")  
-    
-    car = load_img('car.png')
-   # screen = load_img("fondo.png")
+global x_cuadro, y_cuadro, flag_cuadro
+x_cuadro=0
+y_cuadro=0
+flag_cuadro=True
 
-    '''#Creation of the canvas for the simulation objects
-    contenedor = Canvas(gameWindow, width=350, height=600, bg="#FFFFFF")
-    contenedor.place(x=0,y=0)
+def loadImage(nombre):
+    ruta = os.path.join('Images',nombre)
+    imagen = PhotoImage(file=ruta)
+    return imagen
 
-    screenObj = contenedor.create_image(40,20, image = screen)
-    carObj = contenedor.create_image(300,580, image=car)
-    '''
-    gameWindow.mainloop()
+def GUI_TEST():
+    #creo ventana principal
+    ventana_principal = Tk()
+    ventana_principal.title("GUI test")
+    ventana_principal.minsize(680,400)
+    ventana_principal.resizable(width=NO,height=NO)
+    fondo = Canvas(ventana_principal , width=680,height=400, bg = "#FFFFFF")
+    fondo.place(x=0,y=0)
 
-game()
+    def stoper():
+        global flag_cuadro
+        flag_cuadro=False
+
+    def cuadro():
+        global x_cuadro, y_cuadro    
+        while flag_cuadro:
+            Mondrian = loadImage("bola.gif")
+            LabelFondo=Label(ventana_principal, image=Mondrian, bg = "#FFFFFF")
+            LabelFondo.place (x=x_cuadro, y=y_cuadro)  
+            time.sleep(0.3)
+
+    def getCoords():
+        global x_cuadro, y_cuadro
+        myET = eye_tracker(1)
+        listOfImages = ['1.jpg','2.jpg','3.jpg', '4.jpg', '5.jpg']
+        while True:
+            for image in listOfImages:
+                x_cuadro,y_cuadro=myET.pupilDetect('./Images/' +image)
+                #print('image, x , y ', image, x_cuadro, y_cuadro)
+            # if(x_cuadro != None and y_cuadro != None):
+                #    myET.decodify(x_cuadro+50,y_cuadro+53)
+
+    def start():
+        #IniciarHilo
+        a = Thread(target=cuadro, args=())
+        a.start()
+        #IniciarHilo
+        b = Thread(target=getCoords, args=())
+        b.start()
+        ventana_principal.mainloop()
+
+    start()
+
+try:
+    GUI_TEST()
+except:
+    print("Error")
+    exit()

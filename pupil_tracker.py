@@ -53,9 +53,9 @@ class eye_tracker:
         
         imageToTrack = cv2.resize(imageToTrack, (WIDTH, HEIGHT))
 
-        backUpImage = imageToTrack.copy()
+        #backUpImage = imageToTrack.copy()
 
-        imageToTrack = cv2.medianBlur(imageToTrack, 53) #apply the medianBlur function to the image to process
+        imageToTrack = cv2.medianBlur(imageToTrack, 77) #apply the medianBlur function to the image to process
 
         #This method usually increases the global contrast of many images, especially 
         # when the usable data of the image is represented by close contrast values. 
@@ -66,15 +66,15 @@ class eye_tracker:
         imageToTrack = cv2.threshold(imageToTrack,0,255,cv2.THRESH_BINARY)[1]
         
         #inRange return an array with the corresponding colors value (to apply next filter)
-        threshold = cv2.inRange(imageToTrack,200,255) 
+        threshold = cv2.inRange(imageToTrack,250,255) 
         
         #find contuors> its mean that find continuos points with same color or intensity
         contours = cv2.findContours(threshold,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)[1]               
 
         if(DEBBUG):
-            cv2.drawContours(backUpImage, contours, -1, (255,0,255), 1)
+            #cv2.drawContours(backUpImage, contours, -1, (255,0,255), 1)
             #cv2.circle(backUpImage,(cx,cy),1,255,-1)
-            cv2.imshow('Result', backUpImage)
+            cv2.imshow('Result', imageToTrack)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
         for cnt in contours:         
