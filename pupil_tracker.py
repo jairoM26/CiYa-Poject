@@ -50,11 +50,9 @@ class eye_tracker:
         cy = None
         
         imageToTrack = cv2.imread(pImageName,0) #open image to track   
+
+        backUpImage = imageToTrack.copy()
         
-        imageToTrack = cv2.resize(imageToTrack, (WIDTH, HEIGHT))
-
-        #backUpImage = imageToTrack.copy()
-
         imageToTrack = cv2.medianBlur(imageToTrack, 77) #apply the medianBlur function to the image to process
 
         #This method usually increases the global contrast of many images, especially 
@@ -72,9 +70,9 @@ class eye_tracker:
         contours = cv2.findContours(threshold,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)[1]               
 
         if(DEBBUG):
-            #cv2.drawContours(backUpImage, contours, -1, (255,0,255), 1)
+            cv2.drawContours(backUpImage, contours, -1, (255,0,255), 1)
             #cv2.circle(backUpImage,(cx,cy),1,255,-1)
-            cv2.imshow('Result', imageToTrack)
+            cv2.imshow('Result', backUpImage)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
         for cnt in contours:         

@@ -9,6 +9,7 @@ global listOfImages, flagTakePicture, myET, camera
 listOfImages = []
 flagTakePicture = True
 myET = eye_tracker(1)
+camera = None
 try:
     camera = picamera.PiCamera()
     camera.resolution = (800,600)
@@ -22,15 +23,10 @@ def takeAPictureThread(pImageName = "imageTest"):
         #if (i == 5): break
         pict = pImageName + str(i) + ".jpeg"
 	try:
-	    camera.start_preview()	    
 	    camera.capture(pict)
-	    camera.stop_preview()
-	except:
-	    print("Error tomando foto")
-	    break
-        listOfImages.append(pict)
-        i +=1
-	sleep(0.3)
+            listOfImages.append(pict)
+            i+=1
+            sleep(0.3)
 
 def processPicture():
     global listOfImages
