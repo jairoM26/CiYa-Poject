@@ -11,7 +11,9 @@
  * @date 16-07-2018
 
 '''
-
+from picamera.array import PiRGBArray
+from picamera import PiCamera
+import time
 import cv2
 import numpy as np
 from math import pi, atan2, sqrt, degrees
@@ -26,6 +28,8 @@ class eye_tracker:
     '''
     def __init__(self, pType):
         self.decodifyAlgorithm = pType
+
+
     '''
     * @brief function to detect the centroid of the pupil
     * 
@@ -41,30 +45,30 @@ class eye_tracker:
     *          3. Apply medianBlur filter 
     *          4. Apply an equalize histogram
     *          5. Apply a binary filter to get only white and black color
-    * @param imageName:parametro tipo string simple (''), el cual describe el nombre de la imagen a procesar
-    * ejemplo de ejecucion: pupilDetect('myImage.jpg')
+    * @param pImage:parametro de la imagen
+    * ejemplo de ejecucion: pupilDetect(myImage)
     * @return centroid of the pupil
     '''
-    def pupilDetect(self, pImageName):
+    def pupilDetect(self, pImage):
         cx = None 
         cy = None
         
-        imageToTrack = cv2.imread(pImageName,0) #open image to track   
+        #pImage = cv2.imread(pImageName,0) #open image to track   
 
-        backUpImage = imageToTrack.copy()
+        backUpImage = pImage.copy()
         
-        imageToTrack = cv2.medianBlur(imageToTrack, 77) #apply the medianBlur function to the image to process
+        pImage = cv2.medianBlur(pImage, 77) #apply the medianBlur function to the image to process
 
         #This method usually increases the global contrast of many images, especially 
         # when the usable data of the image is represented by close contrast values. 
         # Through this adjustment,the intensities can be better distributed on the histogram.
-        imageToTrack =cv2.equalizeHist(imageToTrack) # do the equalizeHist
+        pImage =cv2.equalizeHist(pImage) # do the equalizeHist
         
         #apply filter to get only white and black color
-        imageToTrack = cv2.threshold(imageToTrack,0,255,cv2.THRESH_BINARY)[1]
+        pImage = cv2.threshold(pImage,0,255,cv2.THRESH_BINARY)[1]
         
         #inRange return an array with the corresponding colors value (to apply next filter)
-        threshold = cv2.inRange(imageToTrack,250,255) 
+        threshold = cv2.inRange(pImage,250,255) 
         
         #find contuors> its mean that find continuos points with same color or intensity
         contours = cv2.findContours(threshold,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)[1]               
@@ -87,6 +91,31 @@ class eye_tracker:
                     cx,cy = int(center['m10']/center['m00']), int(center['m01']/center['m00'])
                 
         return cx, cy       
+
+    '''
+    * @brief 
+    *
+    *
+    '''
+    def videoTest(self):
+        # initialize the camera and grab a reference to the raw camera capture
+        camera = PiCamera()
+        camera.resolution = (WIDTH, HEIGHT)
+        camera.framerate = 32
+        rawCapture = PiRGBArray(camera, size=(WIDTH, HEIGHT))
+        
+        # allow the camera to warmup
+        time.sleep(0.1)
+        
+        # capture frames from the camera
+        for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+            # grab the raw NumPy array representing the image, then initialize the timestamp
+            # and occupied/unoccupied text
+            image = frame.array
+            self.pupilDetect(image)
+
+            # clear the stream in preparation for the next frame
+            rawCapture.truncate(0)
 
     '''
     * @brief method to decodify the pupil centroid

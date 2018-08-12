@@ -9,11 +9,16 @@ global listOfImages, flagTakePicture, myET, camera
 listOfImages = []
 flagTakePicture = True
 myET = eye_tracker(1)
-try:
-    camera = picamera.PiCamera()
-    camera.resolution = (800,600)
-except:
-    print("Error abriendo la camara")
+myET.videoTest()
+
+camera = None
+
+def startCamera():
+    try:
+        camera = picamera.PiCamera()
+        camera.resolution = (800,600)
+    except:
+        print("Error abriendo la camara")
 
 def takeAPictureThread(pImageName = "imageTest"):
     global listOfImages, camera
@@ -45,8 +50,9 @@ def processPicture():
             system("rm " + pict)
 	    sleep(0.3)
 
-
+'''
 a = Thread(target=takeAPictureThread, args=())
 a.start()
 b = Thread(target=processPicture, args=())
 b.start()
+'''
