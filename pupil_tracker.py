@@ -114,10 +114,43 @@ class eye_tracker:
             # grab the raw NumPy array representing the image, then initialize the timestamp
             # and occupied/unoccupied text
             image = frame.array
-            print(self.pupilDetect(image))
+            #print(self.pupilDetect(image))
+
+            image = cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)
+
+            backUpImage = image.copy()
+            
+            image = cv2.medianBlur(image, 77) #apply the medianBlur function to the image to process
+
+            #This method usually increases the global contrast of many images, especially 
+            # when the usable data of the image is represented by close contrast values. 
+            # Through this adjustment,the intensities can be better distributed on the histogram.
+            image =cv2.equalizeHist(image) # do the equalizeHist
+            
+            #apply filter to get only white and black color
+            image = cv2.threshold(image,0,255,cv2.THRESH_BINARY)[1]
+            
+            #inRange return an array with the corresponding colors value (to apply next filter)
+            threshold = cv2.inRange(image,250,255) 
+            
+            #find contuors> its mean that find continuos points with same color or intensity
+            contours = cv2.findContours(threshold,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)[1]
+
+            for cnt in contours:         
+                #find all the points of the contour   
+                center = cv2.moments(cnt)
+                perimeter = cv2.arcLength(cnt,True)
+                radio = perimeter/(2*pi)
+                #TODO find an accurate way to find the real pupil contour            
+                if(radio < 50):
+                    #find the centroid
+                    if (center['m00'] !=0 ): # Evita la división por cero
+                        cv2.drawContours(backUpImage, cnt, -1, (255,0,255), 1)
+                        cx,cy = int(center['m10']/center['m00']), int(center['m01']/center['m00'])
+                        print(cx,cy)
 
             # show the frame
-            cv2.imshow("Frame", image)
+            cv2.imshow("Frame", backUpImage)
             key = cv2.waitKey(1) & 0xFF
 
             # clear the stream in preparation for the next frame
