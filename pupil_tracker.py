@@ -117,8 +117,8 @@ class eye_tracker:
             print(self.pupilDetect(image))
 
             # show the frame
-	        cv2.imshow("Frame", image)
-	        key = cv2.waitKey(1) & 0xFF
+            cv2.imshow("Frame", image)
+            key = cv2.waitKey(1) & 0xFF
 
             # clear the stream in preparation for the next frame
             rawCapture.truncate(0)
