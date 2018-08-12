@@ -151,6 +151,7 @@ class eye_tracker:
 
             # show the frame
             cv2.imshow("Frame", backUpImage)
+            cv2.imshow("Frame", image)
             key = cv2.waitKey(1) & 0xFF
 
             # clear the stream in preparation for the next frame
