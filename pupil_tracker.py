@@ -55,6 +55,8 @@ class eye_tracker:
         
         #pImage = cv2.imread(pImageName,0) #open image to track   
 
+        pImage = cv2.cvtColor(pImage,cv2.COLOR_RGB2GRAY)
+
         backUpImage = pImage.copy()
         
         pImage = cv2.medianBlur(pImage, 77) #apply the medianBlur function to the image to process
