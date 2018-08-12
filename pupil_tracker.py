@@ -112,7 +112,7 @@ class eye_tracker:
             # grab the raw NumPy array representing the image, then initialize the timestamp
             # and occupied/unoccupied text
             image = frame.array
-            self.pupilDetect(image)
+            print(self.pupilDetect(image))
 
             # clear the stream in preparation for the next frame
             rawCapture.truncate(0)
