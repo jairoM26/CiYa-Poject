@@ -11,8 +11,8 @@
  * @date 16-07-2018
 
 '''
-from picamera.array import PiRGBArray
-from picamera import PiCamera
+#from picamera.array import PiRGBArray
+#from picamera import PiCamera
 import time
 import cv2
 import numpy as np
@@ -37,6 +37,7 @@ class eye_tracker:
     *          Based on:
     *          1- https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_imgproc/py_colorspaces/py_colorspaces.html
     *          2- https://gist.github.com/edfungus/67c14af0d5afaae5b18c
+    *          3- https://docs.opencv.org/3.1.0/d7/d8b/tutorial_py_face_detection.html#gsc.tab=0
     *  
     *
     *          Steps
@@ -52,13 +53,21 @@ class eye_tracker:
     def pupilDetect(self, pImage):
         cx = None 
         cy = None
-        
-        #pImage = cv2.imread(pImageName,0) #open image to track   
+
+        #pImage = cv2.imread(pImageName,0) #open image to track    
 
         pImage = cv2.cvtColor(pImage,cv2.COLOR_RGB2GRAY)
 
-        backUpImage = pImage.copy()
+        pImage = cv2.resize(pImage, (WIDTH,HEIGHT), interpolation = cv2.INTER_AREA)
         
+        faces = cv2.CascadeClassifier('haarcascade_eye.xml')
+        detected = faces.detectMultiScale(pImage)   
+        
+        if (len(detected) !=0): 
+            x,y,h,w = detected[0]     
+            pImage = pImage[int(y+(h*.25)):(y+h), x:(x+w)]
+        
+        backUpImage = pImage.copy()
         pImage = cv2.medianBlur(pImage, 77) #apply the medianBlur function to the image to process
 
         #This method usually increases the global contrast of many images, especially 
@@ -74,24 +83,25 @@ class eye_tracker:
         
         #find contuors> its mean that find continuos points with same color or intensity
         contours = cv2.findContours(threshold,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)[1]               
-
-        if(DEBBUG):
-            cv2.drawContours(backUpImage, contours, -1, (255,0,255), 1)
-            #cv2.circle(backUpImage,(cx,cy),1,255,-1)
-            cv2.imshow('Result', backUpImage)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
+                
+        
         for cnt in contours:         
             #find all the points of the contour   
             center = cv2.moments(cnt)
             perimeter = cv2.arcLength(cnt,True)
             radio = perimeter/(2*pi)
             #TODO find an accurate way to find the real pupil contour            
-            if(radio < 50):
+            if(radio < 50):                
                 #find the centroid
                 if (center['m00'] !=0 ): # Evita la división por cero
                     cx,cy = int(center['m10']/center['m00']), int(center['m01']/center['m00'])
-                
+                if(DEBBUG):                                    
+                    cv2.drawContours(backUpImage, cnt, -1, (255,0,255), 1)
+                    cv2.circle(backUpImage,(cx,cy),1,255,-1)
+                    cv2.imshow('Result', backUpImage)
+                    #cv2.imshow('Image', pImage)
+                    cv2.waitKey(0)
+                    cv2.destroyAllWindows()
         return cx, cy       
 
     '''
@@ -99,7 +109,7 @@ class eye_tracker:
     *
     *
     '''
-    def videoTest(self):
+    def videoTestPi(self):
         # initialize the camera and grab a reference to the raw camera capture
         camera = PiCamera()
         camera.resolution = (WIDTH, HEIGHT)
